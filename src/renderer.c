@@ -1,7 +1,6 @@
 #include <math.h>
 #include <raylib.h>
 #include <raymath.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include "renderer.h"
 
@@ -35,6 +34,48 @@ void trs_init(){
 
 void trs_reset(){
   trs_cnt = 0;
+}
+
+void SwapTriangles(Triangle **a, Triangle **b) {
+  Triangle *temp = *a;
+  *a = *b;
+  *b = temp;
+}
+
+int Partition(Triangle **arr, int low, int high) {
+  float pivot = arr[high]->distToCam;
+  int i = low - 1;
+
+  for (int j = low; j <= high - 1; j++) {
+    if (arr[j]->distToCam > pivot) {
+      i++;
+      SwapTriangles(&arr[i], &arr[j]);
+    }
+  }
+  SwapTriangles(&arr[i + 1], &arr[high]);
+  return (i + 1);
+}
+
+void QuickSortTriangles(Triangle **arr, int low, int high) {
+  if (low < high) {
+    int pi = Partition(arr, low, high);
+    QuickSortTriangles(arr, low, pi - 1);
+    QuickSortTriangles(arr, pi + 1, high);
+  }
+}
+
+void trs_draw(){
+  QuickSortTriangles(trs, 0, trs_cnt-1);
+
+  for(int i = 0; i < trs_cnt; i++){
+    float dotProduct = Vector3DotProduct(trs[i]->n, Vector3Normalize(sun_dir));
+    dotProduct = MAX(dotProduct, 0.15);
+    Color col = {(int)(dotProduct*255.0), (int)(dotProduct*255.0), (int)(dotProduct*255.0), 255};
+    col.r = (unsigned char)((float)(col.r)/255 * (float)(trs[i]->clr.r)/255 * 255);
+    col.g = (unsigned char)((float)(col.g)/255 * (float)(trs[i]->clr.g)/255 * 255);
+    col.b = (unsigned char)((float)(col.b)/255 * (float)(trs[i]->clr.b)/255 * 255);
+    DrawTriangle(trs[i]->p2, trs[i]->p1, trs[i]->p3, col);
+  }
 }
 
 Vector3 CalculateTriangleNormal(Vector3 v1, Vector3 v2, Vector3 v3) {
@@ -161,44 +202,3 @@ void draw_render_object(RenderObject *r){
   }
 }
 
-void SwapTriangles(Triangle **a, Triangle **b) {
-  Triangle *temp = *a;
-  *a = *b;
-  *b = temp;
-}
-
-int Partition(Triangle **arr, int low, int high) {
-  float pivot = arr[high]->distToCam;
-  int i = low - 1;
-
-  for (int j = low; j <= high - 1; j++) {
-    if (arr[j]->distToCam > pivot) {
-      i++;
-      SwapTriangles(&arr[i], &arr[j]);
-    }
-  }
-  SwapTriangles(&arr[i + 1], &arr[high]);
-  return (i + 1);
-}
-
-void QuickSortTriangles(Triangle **arr, int low, int high) {
-  if (low < high) {
-    int pi = Partition(arr, low, high);
-    QuickSortTriangles(arr, low, pi - 1);
-    QuickSortTriangles(arr, pi + 1, high);
-  }
-}
-
-void draw_triangles(){
-  QuickSortTriangles(trs, 0, trs_cnt-1);
-
-  for(int i = 0; i < trs_cnt; i++){
-    float dotProduct = Vector3DotProduct(trs[i]->n, Vector3Normalize(sun_dir));
-    dotProduct = MAX(dotProduct, 0.15);
-    Color col = {(int)(dotProduct*255.0), (int)(dotProduct*255.0), (int)(dotProduct*255.0), 255};
-    col.r = (unsigned char)((float)(col.r)/255 * (float)(trs[i]->clr.r)/255 * 255);
-    col.g = (unsigned char)((float)(col.g)/255 * (float)(trs[i]->clr.g)/255 * 255);
-    col.b = (unsigned char)((float)(col.b)/255 * (float)(trs[i]->clr.b)/255 * 255);
-    DrawTriangle(trs[i]->p2, trs[i]->p1, trs[i]->p3, col);
-  }
-}

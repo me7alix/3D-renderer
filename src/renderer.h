@@ -1,6 +1,8 @@
 #ifndef RENDERER_H_
 #define RENDERER_H_
 
+#include <raylib.h>
+#include <raymath.h>
 #include "render_model.h"
 
 #define SCREEN_WIDTH 1280
@@ -29,11 +31,13 @@ typedef struct {
   float distToCam;
 } Triangle;
 
-void set_sun_dir();
+void set_sun_dir(Vector3 _sun_dir);
 RenderCamera *get_current_camera();
+
+void trs_draw();
 void trs_init();
 void trs_reset();
+
 void draw_render_object(RenderObject *r);
-void draw_triangles();
 
 #endif

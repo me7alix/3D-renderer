@@ -1,6 +1,3 @@
-#include <raylib.h>
-#include <raymath.h>
-#include <stdlib.h>
 #include "src/renderer.h"
 
 void movement(RenderCamera *c){
@@ -102,7 +99,7 @@ int main(void){
     draw_render_object(&cube);
     draw_render_object(&plane);
 
-    draw_triangles();
+    trs_draw();
 
     EndDrawing();
   }
